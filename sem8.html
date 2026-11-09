@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Семинар: файлы в C++/CLI Windows Forms</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --line:#d9dde5; --text:#20242a; --muted:#68707b;
+  --accent:#315efb; --accent2:#eaf0ff; --ok:#1f7a4d; --warn:#9a5b00; --danger:#a63838;
+  --vs:#f3f3f3; --code:#171a20; --codeText:#e7eaf0; --shadow:0 4px 18px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 "Segoe UI",Arial,sans-serif}
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px 22px;position:sticky;top:0;z-index:20}
+header .wrap{max-width:1180px;margin:auto;display:flex;gap:18px;align-items:center;justify-content:space-between}
+h1{font-size:22px;margin:0}
+.progress{display:flex;align-items:center;gap:10px;min-width:270px}
+.progressbar{height:8px;background:#e8ebf0;border-radius:99px;overflow:hidden;flex:1}
+.progressbar>div{height:100%;background:var(--accent);width:0;transition:.25s}
+main{max-width:1180px;margin:22px auto;padding:0 18px 40px}
+.topline{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.stepname{font-weight:700;font-size:20px}
+.badge{background:var(--accent2);color:#2348c8;padding:5px 9px;border-radius:10px;font-size:13px}
+.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);gap:18px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.panel h2{font-size:16px;margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
+.panel .body{padding:16px}
+.explain{margin:0 0 14px;color:#333}
+.actionbox{border-left:4px solid var(--accent);background:#f8faff;padding:12px 14px;border-radius:8px;margin:12px 0}
+.actionbox b{display:block;margin-bottom:4px}
+.property-guide{border:1px solid #bfd0ff;background:#f7f9ff;border-radius:10px;margin:12px 0;overflow:hidden}
+.property-guide-title{padding:10px 12px;background:#eaf0ff;color:#2348c8;font-weight:700}
+.property-guide-body{padding:10px 12px}
+.property-group{margin-bottom:10px}
+.property-group:last-child{margin-bottom:0}
+.property-name{font-weight:700;margin-bottom:5px}
+.property-table{width:100%;border-collapse:collapse;font-size:13px}
+.property-table td{border-top:1px solid #e2e7f0;padding:5px 7px;vertical-align:top}
+.property-table td:first-child{width:38%;font-family:Consolas,monospace;color:#34415a}
+.property-table td:last-child{font-weight:600;color:#1f2b42}
+.props-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:5px}
+.props-table td{border-top:1px solid #d8dce2;padding:4px 2px;vertical-align:top;word-break:break-word}
+.props-table td:first-child{width:43%;font-family:Consolas,monospace}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+button{font:inherit;border:0;border-radius:9px;padding:10px 14px;cursor:pointer;background:var(--accent);color:#fff}
+button.secondary{background:#fff;color:#26324a;border:1px solid var(--line)}
+button.ghost{background:#eef1f5;color:#27303b}
+button:disabled{opacity:.45;cursor:not-allowed}
+.vs-shell{border:1px solid #bcc3cd;border-radius:10px;overflow:hidden;background:#fff}
+.vs-title{background:#efeff2;padding:7px 10px;font-size:13px;border-bottom:1px solid #c8ccd3}
+.vs-toolbar{background:#fafafa;padding:6px 10px;border-bottom:1px solid #d6dae0;color:#5b636e;font-size:12px}
+.designer{display:grid;grid-template-columns:105px 1fr 135px;min-height:410px}
+.toolbox,.props{background:#f5f6f8;padding:9px;font-size:12px;color:#4d5560}
+.toolbox{border-right:1px solid #d4d7dc}
+.props{border-left:1px solid #d4d7dc}
+.toolbox b,.props b{display:block;margin-bottom:7px;color:#232830}
+.toolbox div{padding:5px 4px;border-radius:5px;margin-bottom:3px}
+.toolbox .active{background:#dce6ff;color:#244bc7}
+.formarea{padding:18px;background:
+  linear-gradient(90deg,rgba(0,0,0,.025) 1px,transparent 1px),
+  linear-gradient(rgba(0,0,0,.025) 1px,transparent 1px);
+  background-size:16px 16px;display:flex;justify-content:center;align-items:flex-start}
+.form{width:100%;max-width:520px;min-height:330px;background:#f0f0f0;border:1px solid #8d9299;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.form-title{background:#fff;padding:6px 9px;border-bottom:1px solid #b7bbc1;font-size:13px}
+.form-body{padding:15px;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;position:relative}
+.ctrl{background:#fff;border:1px solid #aeb4bc;border-radius:3px;padding:7px 8px;font-size:12px;min-height:32px;display:flex;align-items:center}
+.ctrl.button{background:#f5f5f5;justify-content:center;font-weight:600}
+.ctrl.list{grid-column:1/-1;min-height:104px;align-items:flex-start;white-space:pre-line}
+.ctrl.full{grid-column:1/-1}
+.ctrl.highlight{outline:3px solid #5b83ff;outline-offset:2px;background:#f7f9ff}
+.ctrl.new{animation:pulse 1.4s ease-in-out 2}
+@keyframes pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 5px rgba(49,94,251,.18)}}
+.flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+.node{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px}
+.node.active{background:#eef3ff;border-color:#87a5ff;color:#244bc7;font-weight:700}
+.arrow{color:#8b939e}
+.filebox{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:12px}
+.filetitle{padding:9px 11px;background:#f5f6f8;border-bottom:1px solid var(--line);font-size:13px;font-weight:700}
+.records{display:grid;gap:6px;padding:10px}
+.record{border:1px solid #cfd4dc;border-radius:7px;padding:8px;font-size:13px;background:#fff;position:relative}
+.record.active{border-color:#5b83ff;background:#eef3ff}
+.pointer{font-size:12px;color:#2348c8;font-weight:700;margin-top:4px}
+.textfile{padding:10px;font-family:Consolas,monospace;font-size:13px;background:#fff}
+.line{padding:4px 6px;border-radius:5px}
+.line.active{background:#eef3ff;color:#244bc7;font-weight:700}
+.codewrap{margin-top:14px}
+.code-panel{display:none;margin-top:18px}
+.code-panel.open{display:block}
+.code-panel .body{padding:18px}
+.code-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.code-head-actions{display:flex;gap:8px;flex-wrap:wrap}
+.insert-guide{background:#eef3ff;border:1px solid #b7c8ff;border-left:5px solid var(--accent);border-radius:9px;padding:11px 13px;margin-bottom:12px}
+.insert-guide b{display:block;margin-bottom:4px;color:#2348c8}
+.codebox{display:block;background:var(--code);color:var(--codeText);padding:18px 20px;border-radius:10px;overflow:auto;font:14.5px/1.58 Consolas,"Courier New",monospace;white-space:pre;tab-size:4;min-height:110px}
+.copy-status{font-size:13px;color:var(--ok);font-weight:700;min-height:20px;margin-top:7px}
+.code-open-note{font-size:13px;color:var(--muted);margin-top:10px}
+.question{background:#fff9eb;border:1px solid #ead7a7;border-radius:10px;padding:12px 14px;margin:12px 0}
+.pre-question{background:#f4f7ff;border-color:#becdff}
+.pre-question .answers{display:grid;grid-template-columns:1fr;gap:8px}
+.pre-question .answers button{text-align:left;line-height:1.35}
+.pre-question-note{font-size:13px;color:var(--muted);margin-top:6px}
+.question strong{display:block;margin-bottom:8px}
+.answers{display:flex;flex-wrap:wrap;gap:8px}
+.answers button{background:#fff;color:#303845;border:1px solid #d8c68e;padding:7px 10px}
+.answers button.selected{outline:2px solid var(--accent);outline-offset:1px;background:#eef3ff}
+.answers button.selected.correct{border-color:#8bc7a8;background:#eef9f3;color:#17633e}
+.answers button.selected.wrong{border-color:#d8a2a2;background:#fff1f1;color:#8e3030}
+.feedback{margin-top:8px;font-size:13px;font-weight:600}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--danger)}
+.note{font-size:13px;color:var(--muted);margin-top:10px}
+.summary{background:#f7faf8;border:1px solid #cfe2d7;border-radius:10px;padding:11px 13px;margin-top:12px}
+.hidden{display:none!important}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .designer{grid-template-columns:80px 1fr}
+  .props{display:none}
+}
+@media(max-width:900px){
+  .codebox{font-size:13.5px;padding:15px}
+}
+@media(max-width:620px){
+  header .wrap{align-items:flex-start;flex-direction:column}
+  .progress{width:100%}
+  .designer{grid-template-columns:1fr}
+  .toolbox{display:none}
+  .form-body{grid-template-columns:1fr}
+  .ctrl,.ctrl.full,.ctrl.list{grid-column:1}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div>
+      <h1>Создаём файловое приложение в C++/CLI Windows Forms</h1>
+      <div style="color:var(--muted);font-size:13px">Visual Studio · CLR · .NET Framework · прогресс сохраняется в браузере</div>
+    </div>
+    <div class="progress">
+      <span id="progressText">Шаг 1 из 12</span>
+      <div class="progressbar"><div id="progressFill"></div></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="topline">
+    <div class="stepname" id="stepTitle"></div>
+    <div class="badge" id="stepBadge"></div>
+  </div>
+
+  <div class="layout">
+    <section class="panel">
+      <h2>Что сейчас происходит</h2>
+      <div class="body">
+        <p class="explain" id="stepText"></p>
+
+        <div class="question pre-question" id="preQuestionBox">
+          <strong id="preQuestionText"></strong>
+          <div class="pre-question-note">Сначала выберите порядок действий. Готовая инструкция шага откроется после правильного ответа.</div>
+          <div class="answers" id="preAnswers"></div>
+          <div class="feedback" id="preFeedback"></div>
+        </div>
+
+        <div id="stepInstructions" class="hidden">
+          <div class="actionbox"><b>Действие</b><span id="actionText"></span></div>
+          <div class="property-guide hidden" id="propertyGuide">
+            <div class="property-guide-title" id="propertyGuideTitle">Что заполнить в окне Properties</div>
+            <div class="property-guide-body" id="propertyGuideBody"></div>
+          </div>
+        </div>
+
+        <div class="vs-shell">
+          <div class="vs-title">Visual Studio — FileWorkshop — Form1.h [Конструктор]</div>
+          <div class="vs-toolbar">Файл · Правка · Вид · Проект · Сборка · Отладка</div>
+          <div class="designer">
+            <div class="toolbox">
+              <b>Панель элементов</b>
+              <div>Label</div><div>TextBox</div><div>NumericUpDown</div>
+              <div>Button</div><div>ListBox</div>
+            </div>
+            <div class="formarea">
+              <div class="form">
+                <div class="form-title">Работа с файлами</div>
+                <div class="form-body" id="formBody"></div>
+              </div>
+            </div>
+            <div class="props"><b>Свойства (Properties)</b><div id="propText">Выберите элемент формы</div></div>
+          </div>
+        </div>
+
+        <div class="flow" id="flow"></div>
+
+        <div class="question" id="questionBox">
+          <strong id="questionText"></strong>
+          <div class="answers" id="answers"></div>
+          <div class="feedback" id="feedback"></div>
+        </div>
+
+        <div class="summary" id="summary"></div>
+
+        <div class="controls">
+          <button type="button" class="secondary" id="prevBtn">← Назад</button>
+          <button type="button" id="nextBtn">Следующий шаг →</button>
+          <button type="button" class="ghost" id="resetBtn" title="Очистить сохранённые ответы и начать с первого шага">Начать заново</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <h2>Файл и данные</h2>
+      <div class="body">
+        <div id="fileVisual"></div>
+        <div class="codewrap">
+          <button type="button" class="secondary" id="codeBtn">Показать код для Visual Studio</button>
+        </div>
+        <div class="note">Код скрыт специально: сначала проследите, что меняется в форме и в файле, затем откройте подсказку. Она появится ниже на всю ширину страницы.</div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="panel code-panel" id="codePanel">
+    <h2>Подсказка для повторения в Visual Studio</h2>
+    <div class="body">
+      <div class="code-head">
+        <strong id="codeStepTitle">Код текущего шага</strong>
+        <div class="code-head-actions">
+          <button type="button" class="secondary" id="copyCodeBtn">Скопировать код</button>
+          <button type="button" class="ghost" id="closeCodeBtn">Скрыть подсказку</button>
+        </div>
+      </div>
+      <div class="insert-guide">
+        <b>Куда вставлять этот код в Visual Studio</b>
+        <span id="insertWhere"></span>
+      </div>
+      <pre class="codebox" id="codeBox"></pre>
+      <div class="copy-status" id="copyStatus" aria-live="polite"></div>
+      <div class="code-open-note">Подсказка показывает код только для текущего шага. Элементы интерфейса и их свойства сначала настраивайте в конструкторе Windows Forms.</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const steps = [
+{
+ title:"Создаём проект и пустую форму",
+ preQuestion:{q:"В какой последовательности лучше начать создание приложения?",a:["Создать CLR-проект под .NET Framework → добавить Windows Form → открыть форму в конструкторе","Сначала написать обработчики файлов → затем создать проект → затем добавить форму","Создать текстовый файл вручную → добавить ListBox → только потом создать проект"],ok:0},
+ instructionType:"properties",
+ instructionTitle:"Что заполнить в окне Properties",
+ where:"Form1.h → внутри namespace вашего проекта, рядом с существующими строками using namespace. Добавьте System::IO к остальным using namespace. Саму форму создайте через конструктор Visual Studio.", badge:"Проект",
+ text:"Начинаем с пустого Windows Forms-приложения. Пока в программе нет файловых операций: есть только форма, на которой мы постепенно соберём интерфейс.",
+ action:"Создайте CLR-проект под .NET Framework и добавьте Windows Form Form1.",
+ properties:[{name:"Form1",fields:[["Name","Form1"],["Text","Работа с файлами"],["StartPosition","CenterScreen"],["Size","примерно 700 × 500"]]}],
+ controls:[],
+ flow:["Form1"],
+ file:{type:"none"},
+ question:{q:"Что на этом шаге уже существует?", a:["Только форма","Бинарный файл","Текстовый файл"], ok:0},
+ summary:"Сначала строим интерфейс. Файлы и алгоритмы подключим позже.",
+ code:`// Проект: C++/CLI, CLR, .NET Framework
+// В проект добавлена Windows Form: Form1.h
+
+using namespace System;
+using namespace System::Windows::Forms;
+using namespace System::IO;`
+},
+{
+ title:"Добавляем поле для числа",
+ preQuestion:{q:"Какой порядок действий подходит для добавления поля ввода числа?",a:["Добавить Label → задать ему Text «Число:» → добавить TextBox → задать TextBox имя txtValue","Сначала написать код чтения файла → затем добавить Label → затем закрыть конструктор","Добавить ListBox → переименовать его в txtValue → использовать его вместо TextBox"],ok:0},
+ instructionType:"properties",
+ instructionTitle:"Что заполнить в окне Properties",
+ where:"Вручную этот фрагмент обычно не вставляют. Настройте TextBox через окно Properties. Visual Studio сама запишет соответствующие строки в Form1.h → InitializeComponent(). Не редактируйте InitializeComponent() без необходимости.", badge:"Конструктор формы",
+ text:"Первый элемент интерфейса — поле, куда пользователь введёт число. Мы будем сохранять числа в файл.",
+ action:"Перетащите Label и TextBox на форму. TextBox назовите txtValue.",
+ properties:[{name:"Label",fields:[["Name","lblValue"],["Text","Число:"],["AutoSize","True"]]},{name:"TextBox",fields:[["Name","txtValue"],["Text","оставить пустым"]]}],
+ controls:[
+  {type:"label",text:"Число:"},{type:"textbox",text:"txtValue",new:true}
+ ],
+ flow:["Пользователь","txtValue"],
+ file:{type:"none"},
+ question:{q:"Какой элемент формы пользователь использует для ввода числа?",a:["TextBox","Label","ListBox"],ok:0},
+ summary:"TextBox — это только элемент интерфейса. Запись в файл ещё не выполняется.",
+ code:`// В конструкторе формы задайте имя TextBox:
+txtValue->Name = "txtValue";`
+},
+{
+ title:"Добавляем кнопку «Добавить в бинарный файл»",
+ preQuestion:{q:"Как правильно добавить кнопку для записи числа в бинарный файл?",a:["Перетащить Button на форму → задать Name = btnBinaryAdd → задать Text кнопки","Создать файл numbers.dat вручную → переименовать форму → удалить TextBox","Сначала написать BinaryReader → затем добавить Label → затем создать Button"],ok:0},
+ instructionType:"properties",
+ instructionTitle:"Что заполнить в окне Properties",
+ where:"Вручную этот фрагмент обычно не вставляют. Создайте Button в конструкторе и задайте Name/Text в Properties. Обработчик Click создайте двойным щелчком по кнопке; Visual Studio добавит его в Form1.h.", badge:"Конструктор формы",
+ text:"Кнопка будет запускать запись числа в типизированный файл прямого доступа. На этом шаге мы только создаём кнопку.",
+ action:"Добавьте Button и задайте ему имя btnBinaryAdd.",
+ properties:[{name:"Button",fields:[["Name","btnBinaryAdd"],["Text","Добавить в бинарный файл"],["AutoSize","True"]]}],
+ controls:[
+  {type:"label",text:"Число:"},{type:"textbox",text:"txtValue"},
+  {type:"button",text:"Добавить в бинарный файл",new:true,full:true}
+ ],
+ flow:["txtValue","btnBinaryAdd"],
+ file:{type:"binary",records:[]},
+ question:{q:"Что должно произойти после нажатия кнопки?",a:["Число должно быть записано в файл","Форма закроется","TextBox превратится в файл"],ok:0},
+ summary:"Элемент управления создан. Следующий шаг — связать событие Click с записью данных.",
+ code:`private: System::Void btnBinaryAdd_Click(
+    System::Object^ sender, System::EventArgs^ e)
+{
+    // Здесь позже будет вызов подпрограммы записи.
+}`
+},
+{
+ title:"Записываем число в бинарный файл",
+ preQuestion:{q:"Какой порядок действий нужен при нажатии кнопки записи?",a:["Получить текст из txtValue → преобразовать его в double → вызвать AddBinaryValue(value) → записать значение в numbers.dat → показать сообщение","Открыть numbers.dat для чтения → заполнить ListBox → затем получить число из txtValue","Сначала выполнить Seek → затем создать кнопку → затем преобразовать число в строку"],ok:0},
+ instructionType:"handler",
+ instructionTitle:"Какой обработчик и подпрограмму заполняем",
+ instructionItems:["btnBinaryAdd_Click(...) — обработчик события Click кнопки btnBinaryAdd","AddBinaryValue(double value) — подпрограмма записи числа в numbers.dat"],
+ where:"Form1.h → внутри класса Form1. Функцию AddBinaryValue(...) поместите в секцию private: перед обработчиками событий. Затем дважды щёлкните btnBinaryAdd в конструкторе и вставьте содержимое обработчика в созданный btnBinaryAdd_Click(...).", badge:"FileStream + BinaryWriter",
+ text:"Теперь кнопка действительно работает: число берётся из txtValue и записывается в бинарный файл numbers.dat.",
+ action:"Нажатие кнопки вызывает подпрограмму AddBinaryValue(value).",
+ controls:[
+  {type:"label",text:"Число:"},{type:"textbox",text:"25",highlight:true},
+  {type:"button",text:"Добавить в бинарный файл",highlight:true,full:true},
+  {type:"list",text:"Сообщение: число 25 записано",full:true}
+ ],
+ flow:["txtValue","Click","AddBinaryValue","numbers.dat"],
+ file:{type:"binary",records:[10,18,25],active:2,pointer:"запись новой записи"},
+ question:{q:"Где в этот момент происходит основное изменение?",a:["В файле numbers.dat","В названии формы","В панели Toolbox"],ok:0},
+ summary:"Интерфейс передал число подпрограмме, а подпрограмма изменила содержимое файла.",
+ code:`void AddBinaryValue(double value)
+{
+    FileStream^ fs = gcnew FileStream(
+        "numbers.dat",
+        FileMode::Append,
+        FileAccess::Write);
+
+    BinaryWriter^ writer = gcnew BinaryWriter(fs);
+    writer->Write(value);
+
+    writer->Close();
+    fs->Close();
+}
+
+private: System::Void btnBinaryAdd_Click(
+    System::Object^ sender, System::EventArgs^ e)
+{
+    double value = Convert::ToDouble(txtValue->Text);
+    AddBinaryValue(value);
+    lblStatus->Text = "Число записано.";
+}`
+},
+{
+ title:"Показываем все записи бинарного файла",
+ preQuestion:{q:"Как последовательно вывести все значения бинарного файла в ListBox?",a:["Очистить ListBox → открыть numbers.dat для чтения → читать записи до конца файла → добавлять каждое значение в ListBox → закрыть файл","Открыть numbers.dat для записи → изменить первую запись → закрыть форму","Получить номер записи → выполнить Seek → вывести только одну запись"],ok:0},
+ instructionType:"handler",
+ instructionTitle:"Какой обработчик и подпрограмму заполняем",
+ instructionItems:["btnBinaryShow_Click(...) — обработчик кнопки «Показать бинарный файл»","LoadBinaryValues() — подпрограмма чтения всех записей numbers.dat"],
+ where:"Form1.h → внутри класса Form1 → private:. Функцию LoadBinaryValues() разместите рядом с другими подпрограммами работы с файлами. В обработчике btnBinaryShow_Click(...) вызовите LoadBinaryValues();.", badge:"BinaryReader",
+ text:"Добавляем кнопку чтения и ListBox. Теперь приложение может открыть файл, последовательно прочитать записи и показать их пользователю.",
+ action:"Добавьте btnBinaryShow и lstValues. При нажатии вызывайте LoadBinaryValues().",
+ controls:[
+  {type:"label",text:"Число:"},{type:"textbox",text:"25"},
+  {type:"button",text:"Добавить в бинарный файл",full:true},
+  {type:"button",text:"Показать бинарный файл",new:true,full:true},
+  {type:"list",text:"10\n18\n25",new:true,full:true}
+ ],
+ flow:["numbers.dat","BinaryReader","ListBox"],
+ file:{type:"binary",records:[10,18,25],active:1,pointer:"чтение записи"},
+ question:{q:"Что меняется при чтении файла?",a:["Содержимое ListBox","Содержимое файла обязательно меняется","Размер кнопки"],ok:0},
+ summary:"Чтение не обязано изменять файл. Оно переносит данные из файла в элементы формы.",
+ code:`void LoadBinaryValues()
+{
+    lstValues->Items->Clear();
+
+    if (!File::Exists("numbers.dat"))
+        return;
+
+    FileStream^ fs = gcnew FileStream(
+        "numbers.dat",
+        FileMode::Open,
+        FileAccess::Read);
+
+    BinaryReader^ reader = gcnew BinaryReader(fs);
+
+    while (fs->Position < fs->Length)
+        lstValues->Items->Add(reader->ReadDouble());
+
+    reader->Close();
+    fs->Close();
+}`
+},
+{
+ title:"Добавляем прямой доступ к записи",
+ preQuestion:{q:"Какой порядок действий нужен для чтения одной записи по её номеру?",a:["Получить номер записи → перевести его в индекс → вычислить смещение → выполнить Seek → прочитать значение","Прочитать весь файл строка за строкой → найти нужную строку → преобразовать её в Button","Сначала изменить запись → затем вычислить номер → затем открыть файл"],ok:0},
+ instructionType:"mixed",
+ instructionTitle:"Что настраиваем и какой обработчик добавляем",
+ instructionItems:["Properties → nudIndex: Name = nudIndex, Minimum = 1, Maximum = 1000, Value = 1","Properties → btnBinaryRead: Name = btnBinaryRead, Text = «Прочитать запись»","btnBinaryRead_Click(...) — обработчик кнопки чтения записи","ReadBinaryValue(int index) — подпрограмма прямого чтения"],
+ where:"Form1.h → внутри класса Form1 → private:. Добавьте функцию ReadBinaryValue(int index). Обработчик кнопки btnBinaryRead_Click создайте двойным щелчком по кнопке и вызывайте из него ReadBinaryValue(...). Помните: nudIndex показывает номер с 1, а индекс файла обычно начинается с 0.", badge:"Seek",
+ text:"Файл хранит записи одинакового размера. Поэтому можно перейти сразу к нужной записи, не читая все предыдущие.",
+ action:"Добавьте NumericUpDown для номера записи и кнопку «Прочитать запись».",
+ controls:[
+  {type:"label",text:"Номер записи:"},{type:"numeric",text:"2",new:true},
+  {type:"button",text:"Прочитать запись",new:true,full:true},
+  {type:"list",text:"Запись №2 = 18",full:true}
+ ],
+ flow:["№ записи","Seek","нужная позиция","ReadDouble"],
+ file:{type:"binary",records:[10,18,25],active:1,pointer:"позиция = 1 × 8 байт"},
+ question:{q:"Почему возможен прямой доступ?",a:["Записи имеют фиксированный размер","Файл обязательно текстовый","ListBox хранит адрес файла"],ok:0},
+ summary:"Для double одна запись занимает 8 байт, поэтому позицию можно вычислить по номеру записи.",
+ code:`double ReadBinaryValue(int index)
+{
+    FileStream^ fs = gcnew FileStream(
+        "numbers.dat",
+        FileMode::Open,
+        FileAccess::Read);
+
+    BinaryReader^ reader = gcnew BinaryReader(fs);
+
+    const int recordSize = sizeof(double);
+    fs->Seek(index * recordSize, SeekOrigin::Begin);
+
+    double value = reader->ReadDouble();
+
+    reader->Close();
+    fs->Close();
+    return value;
+}`
+},
+{
+ title:"Изменяем конкретную запись",
+ preQuestion:{q:"Какой порядок действий нужен для изменения выбранной записи?",a:["Получить номер записи и новое значение → вычислить позицию → открыть файл для записи → выполнить Seek → записать новое значение","Открыть текстовый файл → прочитать все строки → удалить бинарный файл","Сначала вывести ListBox → затем создать NumericUpDown → затем вычислить сумму"],ok:0},
+ instructionType:"mixed",
+ instructionTitle:"Что настраиваем и какой обработчик добавляем",
+ instructionItems:["Properties → txtNewValue: Name = txtNewValue, Text оставить пустым","Properties → btnBinaryUpdate: Name = btnBinaryUpdate, Text = «Изменить запись»","btnBinaryUpdate_Click(...) — обработчик кнопки изменения","UpdateBinaryValue(int index, double value) — подпрограмма прямой записи"],
+ where:"Form1.h → внутри класса Form1 → private:. Добавьте UpdateBinaryValue(int index, double value). В созданном Visual Studio обработчике btnBinaryUpdate_Click(...) получите индекс и новое значение из элементов формы, затем вызовите эту функцию.", badge:"Прямой доступ",
+ text:"Тот же принцип позволяет не только читать, но и менять выбранную запись. Указатель файла переводится к нужной позиции, после чего новое значение записывается поверх старого.",
+ action:"Добавьте кнопку «Изменить запись» и вызов UpdateBinaryValue(index, value).",
+ controls:[
+  {type:"label",text:"Номер записи:"},{type:"numeric",text:"2"},
+  {type:"label",text:"Новое значение:"},{type:"textbox",text:"99"},
+  {type:"button",text:"Изменить запись",highlight:true,full:true},
+  {type:"list",text:"10\n99\n25",full:true}
+ ],
+ flow:["№2","Seek","Write","обновлённый файл"],
+ file:{type:"binary",records:[10,99,25],active:1,pointer:"перезапись записи №2"},
+ question:{q:"Какая часть файла изменилась?",a:["Только выбранная запись","Весь файл был обязательно переписан","Ни одна"],ok:0},
+ summary:"Это ключевое преимущество прямого доступа: можно перейти к нужной записи и изменить её на месте.",
+ code:`void UpdateBinaryValue(int index, double value)
+{
+    FileStream^ fs = gcnew FileStream(
+        "numbers.dat",
+        FileMode::Open,
+        FileAccess::Write);
+
+    BinaryWriter^ writer = gcnew BinaryWriter(fs);
+
+    const int recordSize = sizeof(double);
+    fs->Seek(index * recordSize, SeekOrigin::Begin);
+
+    writer->Write(value);
+
+    writer->Close();
+    fs->Close();
+}`
+},
+{
+ title:"Переходим к текстовому файлу",
+ preQuestion:{q:"Как правильно добавить число в текстовый файл?",a:["Получить значение из формы → преобразовать его в число → открыть StreamWriter в режиме добавления → выполнить WriteLine → закрыть файл","Открыть BinaryReader → выполнить Seek → записать значение через ReadDouble","Сначала прочитать весь numbers.txt → удалить строки → затем создать кнопку"],ok:0},
+ instructionType:"mixed",
+ instructionTitle:"Что настраиваем и какой обработчик добавляем",
+ instructionItems:["Properties → btnTextAdd: Name = btnTextAdd, Text = «Записать в текстовый файл»","btnTextAdd_Click(...) — обработчик кнопки записи","AddTextValue(double value) — подпрограмма добавления строки в numbers.txt"],
+ where:"Form1.h → внутри класса Form1 → private:. Добавьте функцию AddTextValue(double value). Обработчик btnTextAdd_Click(...) создайте двойным щелчком по кнопке и вызовите из него AddTextValue(...).", badge:"StreamWriter",
+ text:"Теперь добавим второй способ хранения. В текстовом файле числа сохраняются как строки. Файл можно открыть обычным текстовым редактором.",
+ action:"Добавьте кнопку «Записать в текстовый файл».",
+ controls:[
+  {type:"label",text:"Число:"},{type:"textbox",text:"42.5"},
+  {type:"button",text:"Записать в текстовый файл",new:true,full:true},
+  {type:"list",text:"Сообщение: строка \"42.5\" добавлена в numbers.txt",full:true}
+ ],
+ flow:["txtValue","StreamWriter","numbers.txt"],
+ file:{type:"text",lines:["10","18","42.5"],active:2},
+ question:{q:"Как число хранится в текстовом файле?",a:["Как последовательность символов","Как объект Button","Только в оперативной памяти"],ok:0},
+ summary:"Текстовый файл удобен для обмена данными и просмотра человеком, но числа при чтении нужно преобразовывать из текста.",
+ code:`void AddTextValue(double value)
+{
+    StreamWriter^ writer = gcnew StreamWriter(
+        "numbers.txt", true);
+
+    writer->WriteLine(value);
+    writer->Close();
+}`
+},
+{
+ title:"Читаем числа из текстового файла",
+ preQuestion:{q:"Какой порядок действий нужен для последовательного чтения чисел из текстового файла?",a:["Открыть StreamReader → читать строку через ReadLine → преобразовывать строку в double → выводить значение → повторять до конца файла","Вычислить смещение → выполнить Seek → прочитать одну фиксированную запись","Создать BinaryWriter → записать ListBox в форму → закрыть приложение"],ok:0},
+ instructionType:"mixed",
+ instructionTitle:"Что настраиваем и какой обработчик добавляем",
+ instructionItems:["Properties → btnTextShow: Name = btnTextShow, Text = «Показать текстовый файл»","btnTextShow_Click(...) — обработчик кнопки чтения","LoadTextValues() — подпрограмма последовательного чтения numbers.txt"],
+ where:"Form1.h → внутри класса Form1 → private:. Добавьте LoadTextValues(). В обработчике btnTextShow_Click(...) оставьте вызов этой подпрограммы. Для вывода используйте уже созданный lstValues.", badge:"StreamReader",
+ text:"Текстовый файл читается строка за строкой. Каждую строку нужно преобразовать в число перед вычислениями.",
+ action:"Добавьте кнопку «Показать текстовый файл» и функцию LoadTextValues().",
+ controls:[
+  {type:"button",text:"Показать текстовый файл",highlight:true,full:true},
+  {type:"list",text:"10\n18\n42.5",full:true}
+ ],
+ flow:["numbers.txt","ReadLine","Convert::ToDouble","ListBox"],
+ file:{type:"text",lines:["10","18","42.5"],active:1},
+ question:{q:"Почему требуется Convert::ToDouble?",a:["ReadLine возвращает строку","FileStream возвращает Button","Число уже хранится как double"],ok:0},
+ summary:"Для текстового файла сначала получаем строку, затем преобразуем её в нужный числовой тип.",
+ code:`void LoadTextValues()
+{
+    lstValues->Items->Clear();
+
+    if (!File::Exists("numbers.txt"))
+        return;
+
+    StreamReader^ reader = gcnew StreamReader("numbers.txt");
+
+    while (!reader->EndOfStream)
+    {
+        String^ line = reader->ReadLine();
+        double value = Convert::ToDouble(line);
+        lstValues->Items->Add(value);
+    }
+
+    reader->Close();
+}`
+},
+{
+ title:"Обрабатываем текстовый файл подпрограммой",
+ preQuestion:{q:"Как лучше организовать вычисление суммы чисел из текстового файла?",a:["Обработчик кнопки вызывает SumTextFile() → функция открывает файл → читает строки и накапливает сумму → возвращает результат → обработчик показывает его","В обработчике кнопки создать новую форму → удалить файл → вернуть имя кнопки","Сначала выполнить Seek → затем считать одну запись → считать её суммой всего файла"],ok:0},
+ instructionType:"mixed",
+ instructionTitle:"Что настраиваем и какой обработчик добавляем",
+ instructionItems:["Properties → btnSum: Name = btnSum, Text = «Вычислить сумму»","btnSum_Click(...) — обработчик кнопки вычисления","SumTextFile(String^ fileName) — подпрограмма обработки текстового файла"],
+ where:"Form1.h → внутри класса Form1 → private:. Добавьте SumTextFile(String^ fileName). Затем в созданном обработчике btnSum_Click(...) вызовите функцию и выведите возвращённое значение в lblStatus.", badge:"Подпрограмма",
+ text:"Теперь отделяем ввод-вывод от вычислений. Подпрограмма читает числа из файла и вычисляет их сумму.",
+ action:"Создайте функцию SumTextFile(), а кнопка только вызывает её и показывает результат.",
+ controls:[
+  {type:"button",text:"Вычислить сумму",highlight:true,full:true},
+  {type:"list",text:"Сумма = 70.5",full:true}
+ ],
+ flow:["Button","SumTextFile","StreamReader","sum","Label/ListBox"],
+ file:{type:"text",lines:["10","18","42.5"],active:2},
+ question:{q:"Зачем выносить обработку в отдельную функцию?",a:["Чтобы разделить интерфейс и алгоритм","Чтобы файл стал бинарным","Чтобы скрыть форму"],ok:0},
+ summary:"Событие кнопки остаётся коротким, а работа с файлом оформлена отдельной подпрограммой.",
+ code:`double SumTextFile(String^ fileName)
+{
+    StreamReader^ reader = gcnew StreamReader(fileName);
+    double sum = 0;
+
+    while (!reader->EndOfStream)
+    {
+        String^ line = reader->ReadLine();
+        sum += Convert::ToDouble(line);
+    }
+
+    reader->Close();
+    return sum;
+}
+
+private: System::Void btnSum_Click(
+    System::Object^ sender, System::EventArgs^ e)
+{
+    double sum = SumTextFile("numbers.txt");
+    lblStatus->Text = "Сумма = " + sum.ToString();
+}`
+},
+{
+ title:"Сравниваем два типа файлов",
+ preQuestion:{q:"Как правильно выбрать способ работы с файлом для конкретной задачи?",a:["Определить, нужен ли доступ к конкретной записи или последовательное чтение → выбрать бинарный или текстовый файл → использовать соответствующие операции","Всегда выбирать текстовый файл → затем обязательно выполнять Seek","Всегда выбирать бинарный файл → затем читать его только через ReadLine"],ok:0},
+ instructionType:"none",
+ where:"Это сравнительный фрагмент. Отдельно вставлять его не требуется. Строку с Seek используйте внутри функций прямого доступа к numbers.dat, а ReadLine() — внутри функций последовательного чтения numbers.txt.", badge:"Итог",
+ text:"Приложение умеет работать и с бинарным файлом прямого доступа, и с текстовым файлом последовательного доступа.",
+ action:"Сравните, где данные читаются напрямую по позиции, а где — строка за строкой.",
+ controls:[
+  {type:"button",text:"Бинарный файл: прямой доступ",full:true},
+  {type:"button",text:"Текстовый файл: последовательное чтение",full:true},
+  {type:"list",text:"Бинарный: Seek → нужная запись\nТекстовый: ReadLine → следующая строка",full:true}
+ ],
+ flow:["Бинарный файл","↔","Текстовый файл"],
+ file:{type:"compare"},
+ question:{q:"Какой механизм характерен для прямого доступа?",a:["Seek","ReadLine","MessageBox"],ok:0},
+ summary:"Бинарный фиксированный формат удобен для доступа к конкретной записи. Текстовый — для последовательного обмена и чтения человеком.",
+ code:`// Прямой доступ:
+fs->Seek(index * sizeof(double), SeekOrigin::Begin);
+
+// Последовательный текстовый ввод:
+String^ line = reader->ReadLine();`
+},
+{
+ title:"Готовое приложение",
+ preQuestion:{q:"Как проходит полный путь данных в собранном приложении?",a:["Пользователь вводит данные → обработчик получает их → вызывает подпрограмму → подпрограмма работает с файлом → результат возвращается в форму","Файл сам создаёт Button → Button создаёт Form1 → пользователь только закрывает окно","ListBox напрямую изменяет код Form1.h → затем Visual Studio создаёт файл"],ok:0},
+ instructionType:"none",
+ where:"Отдельно вставлять этот комментарий не нужно. Используйте его как карту структуры Form1.h: обработчики кнопок остаются в классе Form1, а подпрограммы работы с файлами размещаются в секции private: этого же класса.", badge:"Финал",
+ text:"Все элементы собраны в одном Windows Forms-приложении. Теперь можно повторить проект в Visual Studio, открывая код только для нужного шага.",
+ action:"Проверьте полный маршрут данных: форма → подпрограмма → файл → подпрограмма → форма.",
+ controls:[
+  {type:"label",text:"Число:"},{type:"textbox",text:"25"},
+  {type:"button",text:"Добавить в бинарный файл",full:true},
+  {type:"button",text:"Прочитать / изменить запись",full:true},
+  {type:"button",text:"Записать / прочитать текстовый файл",full:true},
+  {type:"button",text:"Вычислить сумму",full:true},
+  {type:"list",text:"Результаты работы программы",full:true}
+ ],
+ flow:["Форма","Подпрограммы","Файлы","Результат"],
+ file:{type:"compare"},
+ question:{q:"Какая архитектура получилась?",a:["Интерфейс вызывает подпрограммы работы с файлами","Весь код хранится в Button","Файл управляет формой"],ok:0},
+ summary:"Главная идея семинара: студент видит создание одного приложения по шагам и понимает, где именно меняются данные.",
+ code:`// Итоговая структура:
+// 1. Обработчики кнопок получают данные с формы.
+// 2. Отдельные функции работают с файлами.
+// 3. Результат возвращается в элементы формы.
+//
+// Для повторения откройте код нужного шага выше.`
+}
+];
+
+const STORAGE_KEY = "cppcli_fileworkshop_progress_v1";
+
+function loadProgress(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return {step:0, pre:{}, post:{}};
+    const data=JSON.parse(raw);
+    return {
+      step:Number.isInteger(data.step) ? data.step : 0,
+      pre:data.pre && typeof data.pre==="object" ? data.pre : {},
+      post:data.post && typeof data.post==="object" ? data.post : {}
+    };
+  }catch(e){
+    return {step:0, pre:{}, post:{}};
+  }
+}
+
+let progressState=loadProgress();
+let step=Math.max(0, Math.min(steps.length-1, progressState.step || 0));
+
+function saveProgress(){
+  progressState.step=step;
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progressState));
+  }catch(e){}
+}
+
+function clearSavedProgress(){
+  progressState={step:0, pre:{}, post:{}};
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+}
+
+const $ = id => document.getElementById(id);
+
+
+function renderProperties(stepData){
+ const guide=$("propertyGuide");
+ const guideTitle=$("propertyGuideTitle");
+ const guideBody=$("propertyGuideBody");
+
+ guide.classList.add("hidden");
+ guideBody.innerHTML="";
+
+ const type=stepData.instructionType || (stepData.properties && stepData.properties.length ? "properties" : "none");
+
+ if(type==="none"){
+   $("propText").innerHTML="Выберите элемент формы";
+   return;
+ }
+
+ guide.classList.remove("hidden");
+ guideTitle.textContent=stepData.instructionTitle || (type==="properties"
+   ? "Что заполнить в окне Properties"
+   : "Что настраиваем на этом шаге");
+
+ if(type==="properties"){
+   const properties=stepData.properties || [];
+   properties.forEach((g)=>{
+     const group=document.createElement("div");
+     group.className="property-group";
+
+     const title=document.createElement("div");
+     title.className="property-name";
+     title.textContent=g.name;
+     group.appendChild(title);
+
+     const table=document.createElement("table");
+     table.className="property-table";
+     g.fields.forEach(([key,value])=>{
+       const tr=document.createElement("tr");
+       const a=document.createElement("td"); a.textContent=key;
+       const b=document.createElement("td"); b.textContent=value;
+       tr.appendChild(a); tr.appendChild(b); table.appendChild(tr);
+     });
+     group.appendChild(table);
+     guideBody.appendChild(group);
+   });
+
+   const first=properties[0];
+   if(first){
+     let html='<b>'+escapeHtml(first.name)+'</b><table class="props-table">';
+     first.fields.forEach(([k,v])=>{
+       html+='<tr><td>'+escapeHtml(k)+'</td><td>'+escapeHtml(v)+'</td></tr>';
+     });
+     html+='</table>';
+     $("propText").innerHTML=html;
+   }
+   return;
+ }
+
+ // Handler / mixed steps: show action-oriented instructions, not a fake Properties table.
+ const items=stepData.instructionItems || [];
+ const ul=document.createElement("ul");
+ ul.style.margin="0";
+ ul.style.paddingLeft="20px";
+ items.forEach(item=>{
+   const li=document.createElement("li");
+   li.textContent=item;
+   li.style.marginBottom="6px";
+   ul.appendChild(li);
+ });
+ guideBody.appendChild(ul);
+
+ // Properties pane should only pretend to show Properties when there are actual property values.
+ $("propText").innerHTML = type==="mixed"
+   ? "На этом шаге часть настроек задаётся через Properties, а код обработчиков — в Form1.h."
+   : "На этом шаге окно Properties не заполняется: создаётся обработчик/подпрограмма в Form1.h.";
+}
+
+function escapeHtml(v){
+ return String(v).replace(/[&<>"']/g, c => ({
+   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+ }[c]));
+}
+
+function renderControls(items){
+ const body=$("formBody"); body.innerHTML="";
+ if(!items.length){
+   const d=document.createElement("div"); d.className="ctrl full";
+   d.textContent="Пустая форма — элементы будут добавляться по шагам";
+   body.appendChild(d); return;
+ }
+ items.forEach((c,idx)=>{
+   const d=document.createElement("div");
+   d.className="ctrl "+(c.type==="button"?"button ":"")+(c.type==="list"?"list ":"")+(c.full?"full ":"")+(c.highlight?"highlight ":"")+(c.new?"new ":"");
+   d.textContent=c.text;
+   d.dataset.idx=idx;
+   d.addEventListener("click",()=>{
+      document.querySelectorAll(".ctrl").forEach(x=>x.classList.remove("highlight"));
+      d.classList.add("highlight");
+      const s=steps[step];
+      const props=(s.instructionType==="properties" ? (s.properties||[]) : []);
+      let match=props.find(p=>{
+        const n=p.name.toLowerCase();
+        const t=(c.type||"").toLowerCase();
+        return n.includes(t) || (c.text && n.includes(String(c.text).toLowerCase()));
+      }) || props[0];
+      if(match){
+        let html='<b>'+escapeHtml(match.name)+'</b><table class="props-table">';
+        match.fields.forEach(([k,v])=>{
+          html+='<tr><td>'+escapeHtml(k)+'</td><td>'+escapeHtml(v)+'</td></tr>';
+        });
+        html+='</table>';
+        $("propText").innerHTML=html;
+      } else {
+        if(s.instructionType==="handler"){
+          $("propText").textContent="Для этого шага свойства элемента не меняются. Заполняется обработчик события в Form1.h.";
+        } else if(s.instructionType==="mixed"){
+          $("propText").textContent="Смотрите блок над формой: там отдельно указаны свойства и имя обработчика.";
+        } else {
+          $("propText").textContent="Выбран элемент: "+(c.type||"control")+" · Text = "+c.text;
+        }
+      }
+   });
+   body.appendChild(d);
+ });
+}
+
+function renderFlow(flow){
+ const f=$("flow"); f.innerHTML="";
+ flow.forEach((x,i)=>{
+   const n=document.createElement("span");
+   n.className="node "+(i===flow.length-1?"active":"");
+   n.textContent=x; f.appendChild(n);
+   if(i<flow.length-1){const a=document.createElement("span");a.className="arrow";a.textContent="→";f.appendChild(a);}
+ });
+}
+
+function renderFile(file){
+ const box=$("fileVisual");
+ if(file.type==="none"){
+   box.innerHTML='<div class="filebox"><div class="filetitle">Файл пока не используется</div><div style="padding:12px;color:#68707b">На этом шаге меняется только интерфейс приложения.</div></div>'; return;
+ }
+ if(file.type==="binary"){
+   let rows=(file.records||[]).map((v,i)=>`<div class="record ${file.active===i?"active":""}"><b>Запись ${i+1}</b> · double · значение: ${v}${file.active===i?`<div class="pointer">← ${file.pointer||"текущая позиция"}</div>`:""}</div>`).join("");
+   if(!rows) rows='<div style="color:#68707b">Файл пуст</div>';
+   box.innerHTML=`<div class="filebox"><div class="filetitle">numbers.dat — бинарный файл</div><div class="records">${rows}</div></div>`; return;
+ }
+ if(file.type==="text"){
+   let rows=(file.lines||[]).map((v,i)=>`<div class="line ${file.active===i?"active":""}">${i+1}: ${v}${file.active===i?"  ← текущая строка":""}</div>`).join("");
+   box.innerHTML=`<div class="filebox"><div class="filetitle">numbers.txt — текстовый файл</div><div class="textfile">${rows}</div></div>`; return;
+ }
+ box.innerHTML=`<div class="filebox"><div class="filetitle">Сравнение</div>
+ <div style="padding:12px">
+ <b>numbers.dat</b><div>фиксированные записи → можно вычислить позицию и выполнить Seek</div>
+ <hr style="border:0;border-top:1px solid #ddd;margin:12px 0">
+ <b>numbers.txt</b><div>строки текста → читаются последовательно через ReadLine</div>
+ </div></div>`;
+}
+
+
+const preAnswerOrderCache = {};
+
+function getStableVariants(q, stepIndex, cache, savedGroup){
+  if(cache[stepIndex]) return cache[stepIndex];
+
+  const saved=savedGroup && savedGroup[stepIndex];
+  if(saved && Array.isArray(saved.order) && saved.order.length===q.a.length){
+    const variants=saved.order.map(originalIndex=>({
+      text:q.a[originalIndex],
+      correct:originalIndex===q.ok,
+      originalIndex
+    }));
+    cache[stepIndex]=variants;
+    return variants;
+  }
+
+  const variants=q.a.map((text,i)=>({text,correct:i===q.ok,originalIndex:i}));
+  for(let i=variants.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [variants[i],variants[j]]=[variants[j],variants[i]];
+  }
+  if(variants.length>1 && variants[0].correct){
+    const j=1+Math.floor(Math.random()*(variants.length-1));
+    [variants[0],variants[j]]=[variants[j],variants[0]];
+  }
+  cache[stepIndex]=variants;
+  return variants;
+}
+
+function renderPreQuestion(q, stepIndex){
+ $("preQuestionText").textContent=q.q;
+ $("preAnswers").innerHTML="";
+ $("preFeedback").textContent="";
+ $("preFeedback").className="feedback";
+ $("stepInstructions").classList.add("hidden");
+
+ const variants=getStableVariants(q,stepIndex,preAnswerOrderCache,progressState.pre);
+ const saved=progressState.pre[stepIndex];
+
+ variants.forEach(item=>{
+   const b=document.createElement("button");
+   b.type="button";
+   b.textContent=item.text;
+
+   if(saved && saved.selected===item.originalIndex){
+     b.classList.add("selected", item.correct ? "correct" : "wrong");
+   }
+
+   b.addEventListener("click",()=>{
+     progressState.pre[stepIndex]={
+       selected:item.originalIndex,
+       correct:item.correct,
+       solved:item.correct,
+       order:variants.map(v=>v.originalIndex)
+     };
+     saveProgress();
+
+     $("preAnswers").querySelectorAll("button").forEach(x=>{
+       x.classList.remove("selected","correct","wrong");
+     });
+     b.classList.add("selected", item.correct ? "correct" : "wrong");
+
+     if(item.correct){
+       $("preFeedback").textContent="Верно. Теперь сравните свой план с готовой инструкцией ниже.";
+       $("preFeedback").className="feedback ok";
+       $("stepInstructions").classList.remove("hidden");
+     } else {
+       $("preFeedback").textContent="Последовательность не совсем подходит. Попробуйте ещё раз.";
+       $("preFeedback").className="feedback bad";
+       $("stepInstructions").classList.add("hidden");
+     }
+   });
+   $("preAnswers").appendChild(b);
+ });
+
+ if(saved){
+   if(saved.correct){
+     $("preFeedback").textContent="Верно. Этот ответ сохранён.";
+     $("preFeedback").className="feedback ok";
+     $("stepInstructions").classList.remove("hidden");
+   }else if(saved.selected!==undefined){
+     $("preFeedback").textContent="Вы ранее выбрали этот вариант. Он неверный — попробуйте ещё раз.";
+     $("preFeedback").className="feedback bad";
+   }
+ }
+}
+
+const answerOrderCache = {};
+
+function renderQuestion(q, stepIndex){
+ $("questionText").textContent=q.q;
+ $("answers").innerHTML="";
+ $("feedback").textContent="";
+ $("feedback").className="feedback";
+
+ const variants=getStableVariants(q,stepIndex,answerOrderCache,progressState.post);
+ const saved=progressState.post[stepIndex];
+
+ variants.forEach(item=>{
+   const b=document.createElement("button");
+   b.type="button";
+   b.textContent=item.text;
+
+   if(saved && saved.selected===item.originalIndex){
+     b.classList.add("selected", item.correct ? "correct" : "wrong");
+   }
+
+   b.addEventListener("click",()=>{
+     progressState.post[stepIndex]={
+       selected:item.originalIndex,
+       correct:item.correct,
+       order:variants.map(v=>v.originalIndex)
+     };
+     saveProgress();
+
+     $("answers").querySelectorAll("button").forEach(x=>{
+       x.classList.remove("selected","correct","wrong");
+     });
+     b.classList.add("selected", item.correct ? "correct" : "wrong");
+
+     if(item.correct){
+       $("feedback").textContent="Верно.";
+       $("feedback").className="feedback ok";
+     } else {
+       $("feedback").textContent="Попробуйте ещё раз и проследите маршрут данных на схеме выше.";
+       $("feedback").className="feedback bad";
+     }
+   });
+   $("answers").appendChild(b);
+ });
+
+ if(saved){
+   if(saved.correct){
+     $("feedback").textContent="Верно. Этот ответ сохранён.";
+     $("feedback").className="feedback ok";
+   }else if(saved.selected!==undefined){
+     $("feedback").textContent="Вы ранее выбрали этот вариант. Он неверный — можно выбрать другой.";
+     $("feedback").className="feedback bad";
+   }
+ }
+}
+
+function render(){
+ const s=steps[step];
+ $("stepTitle").textContent=s.title; $("stepBadge").textContent=s.badge;
+ $("stepInstructions").classList.add("hidden");
+ $("stepText").textContent=s.text; $("actionText").textContent=s.action; $("summary").textContent=s.summary;
+ $("codeBox").textContent=s.code;
+ $("insertWhere").textContent=s.where || "Form1.h → внутри класса Form1.";
+ $("codeStepTitle").textContent="Шаг "+(step+1)+": "+s.title;
+ $("codePanel").classList.remove("open");
+ $("copyStatus").textContent="";
+ $("codeBtn").textContent="Показать код для Visual Studio";
+ renderPreQuestion(s.preQuestion, step); renderProperties(s); renderControls(s.controls); renderFlow(s.flow); renderFile(s.file); renderQuestion(s.question, step);
+ $("progressText").textContent=`Шаг ${step+1} из ${steps.length}`;
+ $("progressFill").style.width=((step+1)/steps.length*100)+"%";
+ $("prevBtn").disabled=step===0; $("nextBtn").disabled=step===steps.length-1;
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+$("prevBtn").addEventListener("click",()=>{
+  if(step>0){ step--; saveProgress(); render(); }
+});
+$("nextBtn").addEventListener("click",()=>{
+  if(step<steps.length-1){ step++; saveProgress(); render(); }
+});
+$("resetBtn").addEventListener("click",()=>{
+  clearSavedProgress();
+  step=0;
+  Object.keys(preAnswerOrderCache).forEach(k=>delete preAnswerOrderCache[k]);
+  Object.keys(answerOrderCache).forEach(k=>delete answerOrderCache[k]);
+  render();
+});
+$("codeBtn").addEventListener("click",()=>{
+ const panel=$("codePanel");
+ panel.classList.add("open");
+ $("codeBtn").textContent="Код открыт ниже";
+ $("copyStatus").textContent="";
+ panel.scrollIntoView({behavior:"smooth",block:"start"});
+});
+
+$("closeCodeBtn").addEventListener("click",()=>{
+ $("codePanel").classList.remove("open");
+ $("codeBtn").textContent="Показать код для Visual Studio";
+ $("copyStatus").textContent="";
+});
+
+async function copyCurrentCode(){
+ const code=$("codeBox").textContent;
+ let copied=false;
+
+ if(navigator.clipboard && window.isSecureContext){
+   try{
+     await navigator.clipboard.writeText(code);
+     copied=true;
+   }catch(e){}
+ }
+
+ if(!copied){
+   const area=document.createElement("textarea");
+   area.value=code;
+   area.setAttribute("readonly","");
+   area.style.position="absolute";
+   area.style.left="-9999px";
+   document.body.appendChild(area);
+   area.select();
+   try{ copied=document.execCommand("copy"); }catch(e){ copied=false; }
+   document.body.removeChild(area);
+ }
+
+ $("copyStatus").textContent=copied
+   ? "Код скопирован. Перейдите в указанное место в Visual Studio и вставьте его."
+   : "Автоматическое копирование недоступно. Выделите код в блоке и скопируйте его вручную.";
+}
+
+$("copyCodeBtn").addEventListener("click",copyCurrentCode);
+render();
+</script>
+</body>
+</html>
